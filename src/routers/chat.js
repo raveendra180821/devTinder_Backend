@@ -4,20 +4,20 @@ const Chat = require("../models/chat");
 
 const chatRouter = express.Router();
 
-chatRouter.get("/chat/:recieverId", userAuth, async (req, res) => {
+chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
   try {
-    const { recieverId } = req.params;
+    const { receiverId } = req.params;
     const { _id: senderId } = req.user;
 
     let chat = await Chat.findOne({
-      participants: { $all: [senderId, recieverId] },
+      participants: { $all: [senderId, receiverId] },
     })
       .populate("messages.sender", "firstName lastName")
-      .populate("messages.reciever", "firstName lastName");
+      .populate("messages.receiver", "firstName lastName");
 
     if (!chat) {
       chat = new Chat({
-        participants: [senderId, recieverId],
+        participants: [senderId, receiverId],
         messages: [],
       });
     }

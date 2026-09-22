@@ -9,7 +9,7 @@ const messagesSchema = new Schema(
       ref: "User",
       required: true,
     },
-    reciever: {
+    receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -18,6 +18,9 @@ const messagesSchema = new Schema(
       type: String,
       required: true,
     },
+    timeStamp: {
+      type: Date
+    }
   },
   { timestamps: true },
 );
