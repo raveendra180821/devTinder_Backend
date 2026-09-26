@@ -11,9 +11,7 @@ chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
 
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
-    }).populate("participants", "firstName lastName photoUrl")
-      .populate("messages.sender", "firstName lastName")
-      .populate("messages.receiver", "firstName lastName");
+    })
 
     if (!chat) {
       chat = new Chat({
@@ -21,6 +19,21 @@ chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
         messages: [],
       });
     }
+
+    chat = await chat.populate([
+      {
+        path: "participants",
+        select: "firstName lastName photoUrl",
+      },
+      {
+        path: "messages.receiver",
+        select: "firstName lastName",
+      },
+      {
+        path: "messages.receiver",
+        select: "firstName lastName",
+      },
+    ]);
 
     await chat.save();
 
