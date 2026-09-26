@@ -11,7 +11,7 @@ chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
 
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
-    })
+    }).populate("participants", "firstName lastName photoUrl")
       .populate("messages.sender", "firstName lastName")
       .populate("messages.receiver", "firstName lastName");
 
@@ -24,7 +24,7 @@ chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
 
     await chat.save();
 
-    res.send(chat.messages);
+    res.send(chat);
   } catch (e) {
     res.status(400).send("Something went wrong");
     console.log(e);

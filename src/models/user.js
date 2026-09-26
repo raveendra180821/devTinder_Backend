@@ -73,6 +73,13 @@ const userSchema = new Schema({
   },
   dateUpdated: {
     type: Date
+  },
+  status: {
+    type: Boolean,
+    default: false
+  },
+  lastSeen: {
+    type: Date,
   }
 });
 

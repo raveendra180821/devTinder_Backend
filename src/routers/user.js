@@ -8,12 +8,10 @@ const User = require("../models/user");
 const USER_SAFE_DATA = [
   "firstName",
   "lastName",
-  "gender",
   "photoUrl",
   "about",
-  "age",
-  "companyName",
-  "designation",
+  "status",
+  "lastSeen"
 ];
 
 userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
