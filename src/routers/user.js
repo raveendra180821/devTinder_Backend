@@ -11,7 +11,11 @@ const USER_SAFE_DATA = [
   "photoUrl",
   "about",
   "status",
-  "lastSeen"
+  "lastSeen",
+  "age",
+  "gender",
+  "companyName",
+  "designation"
 ];
 
 userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
@@ -80,16 +84,16 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId toUserId ");
 
-    const hiddenUsersfromFeed = new Set();
+    const hideUsersfromFeed = new Set();
 
     loggedInUserConnectionReqs.map((connection) => {
-      hiddenUsersfromFeed.add(connection.fromUserId.toString());
-      hiddenUsersfromFeed.add(connection.toUserId.toString());
+      hideUsersfromFeed.add(connection.fromUserId.toString());
+      hideUsersfromFeed.add(connection.toUserId.toString());
     });
 
     const feedUsers = await User.find({
       $and: [
-        { _id: { $nin: [...hiddenUsersfromFeed] } },
+        { _id: { $nin: [...hideUsersfromFeed] } },
         { _id: { $ne: loggedInUser._id } },
       ],
     })
