@@ -10,22 +10,38 @@ const initializeSocket = (server) => {
     },
   });
 
+  const onlineUsers = new Map();
+
   io.on("connection", (socket) => {
+    socket.on("userOnline", async ({ userId }) => {
+      socket.userId = userId;
+      onlineUsers.set(userId, socket.id);
+      const user = await User.findByIdAndUpdate(userId, { status: true });
+    });
 
     socket.on("joinChat", ({ senderName, senderId, receiverId }) => {
       const roomId = [senderId, receiverId].sort().join("_");
       socket.join(roomId);
-      console.log(senderName + " joined in room: " + roomId)
+
+    });
+
+    socket.on("leaveChat", ({ senderId, receiverId }) => {
+      const roomId = [senderId, receiverId].sort().join("_");
+      socket.leave(roomId);
+
     });
 
     socket.on(
       "sendMessage",
-      async ({ senderFirstName, senderLastName, senderId, receiverId, message }) => {
-
+      async ({
+        senderFirstName,
+        senderLastName,
+        senderId,
+        receiverId,
+        message,
+      }) => {
         try {
           const roomId = [senderId, receiverId].sort().join("_");
-
-          console.log("server: massage received, saving the message")
 
           let chat = await Chat.findOne({
             participants: { $all: [senderId, receiverId] },
@@ -38,36 +54,47 @@ const initializeSocket = (server) => {
             });
           }
 
-          const timeStamp = new Date()
+          const timeStamp = new Date();
 
           chat.messages.push({
             sender: senderId,
             receiver: receiverId,
             message,
-            timeStamp
+            timeStamp,
           });
 
           await chat.save();
 
-          console.log("server: message saved, sending to frontend")
+          io.to(roomId).emit("messageRecived", {
+            senderId,
+            senderFirstName,
+            senderLastName,
+            message,
+            timeStamp,
+          });
 
-          io.to(roomId).emit("messageRecived", { senderId, senderFirstName, senderLastName, message, timeStamp });
+          receiverSocketId = onlineUsers.get(receiverId);
+          if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessageNotification", {
+              senderId,
+              senderFirstName,
+              senderLastName,
+              message,
+            });
+          }
         } catch (e) {
           console.log(e);
         }
       },
     );
 
-    socket.on("userOnline", async ({ userId }) => {
-      socket.userId = userId
-      const user = await User.findByIdAndUpdate(userId, { status: true })
-    })
-
     socket.on("disconnect", async () => {
-      const userId = socket.userId
-      const user = await User.findByIdAndUpdate(userId, { status: false, lastSeen: new Date() })
-    })
-
+      const userId = socket.userId;
+      const user = await User.findByIdAndUpdate(userId, {
+        status: false,
+        lastSeen: new Date(),
+      });
+    });
   });
 };
 

@@ -26,7 +26,7 @@ chatRouter.get("/chat/:receiverId", userAuth, async (req, res) => {
         select: "firstName lastName photoUrl",
       },
       {
-        path: "messages.receiver",
+        path: "messages.sender",
         select: "firstName lastName",
       },
       {
