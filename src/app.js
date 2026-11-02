@@ -9,7 +9,7 @@ const http = require("http");
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "https://devtin.vercel.app",
   credentials: true,
 };
 
@@ -33,12 +33,14 @@ const server = http.createServer(app);
 
 initializeSocket(server)
 
+const PORT = process.env.PORT
+
 connectDB()
   .then(() => {
     console.log("Database connection established");
   })
   .then(() => {
-    server.listen(process.env.PORT, () => {
+    server.listen(PORT, "0.0.0.0", () => {
       console.log("Server is up and running on port 3000");
     });
   })
